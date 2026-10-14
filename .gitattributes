@@ -1,0 +1,8 @@
+# Binary files: never convert line endings (a CRLF checkout corrupts PDFs on Windows)
+*.pdf     binary
+*.png     binary
+*.jpg     binary
+*.pptx    binary
+*.docx    binary
+*.npz     binary
+*.parquet binary
