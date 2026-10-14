@@ -8,6 +8,8 @@ Grid: 6, 8, 10, 12, 14, 16 qubits x L = 6, 8, 10 on NF-UNSW-NB15-v2, 512 shots, 
 | `grid_effects_check.json` | paired difference quantum − classical with 4000-resample bootstrap 95% intervals |
 | `rerun_comparison.json` | 14 Oct rerun vs 13 Oct run: all 12 shared cells bit-identical; 3 new cells (L=10) |
 | `cells/results_<N>q_a2a_L<L>.json` | full per-cell output (spec, budget, options) for 14 of 18 cells |
+| `emulator/emulator_run_6q_L6.json` | **Quantinuum H2-Emulator run**: 3 job IDs, angles, raw shot counts, emulator vs NumPy features and their agreement |
+| `emulator/aqora_jobs_H2-Emulator.png` | Aqora Jobs page: the 3 jobs completed on H2-Emulator, owner QC_Connect |
 
 Missing per-cell files: `14q_a2a_L{6,8,10}` (13 Oct run, not rerun) and `16q_a2a_L10`. Their numbers are
 still in `sweep_summary_full_grid.json`.

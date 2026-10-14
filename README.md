@@ -19,6 +19,8 @@ classical PCA baseline on known attacks (supervised) and unseen attacks (zero-da
 
 - [How this works](#how-this-works)
 - [Results at a glance](#results-at-a-glance)
+- [Emulator execution (Quantinuum H2-Emulator)](#emulator-execution-quantinuum-h2-emulator)
+- [Documents](#documents)
 - [Backend support](#backend-support)
 - [Worked examples](#worked-examples)
 - [Where to take this](#where-to-take-this)
@@ -56,9 +58,39 @@ classical PCA baseline on known attacks (supervised) and unseen attacks (zero-da
 
 Files, provenance of each cell and the check against the report table: [results/README.md](results/README.md).
 
+## Emulator execution (Quantinuum H2-Emulator)
+
+The reservoir circuit runs on Quantinuum's stack, not only in our simulator. Three circuits of the
+`6q_a2a_L6` cell (the same frozen reservoir as the sweep: seed 1234, 6 qubits, L = 6, 105 `ZZPhase`
+gates and 18 mid-circuit measure-and-resets each) were submitted from the Aqora challenge workspace
+with `aqora.QPU` to **`nexus:H2-Emulator`**, 200 shots each, on 14 Oct 2026.
+
+| Job ID | Status |
+|---|---|
+| `AFByb3ZpZGVySm9iAaE7UeXMfVCXVYSUU-KRFA` | completed |
+| `AFByb3ZpZGVySm9iAaE7UerBfkKVNjaa_Qh69Q` | completed |
+| `AFByb3ZpZGVySm9iAaE7Ue9Ze1CP_cVW5SsOcA` | completed |
+
+The measured `<Z>` features match this repo's NumPy simulator on the same circuits: **r = 0.994**,
+mean |difference| 0.049, **72 of 72 features within 3 sigma** of shot noise. At this size the
+emulator's H2 noise model moves the features less than shot noise does; this is a check that the
+circuit compiles and executes as simulated, not evidence about the deeper 14–16 qubit circuits.
+
+- Code that ran: [scripts/aqora_emulator_cells.py](scripts/aqora_emulator_cells.py) (marimo cells for the Aqora workspace)
+- Record with raw shot counts: [results/emulator/emulator_run_6q_L6.json](results/emulator/emulator_run_6q_L6.json)
+- Jobs page: [results/emulator/aqora_jobs_H2-Emulator.png](results/emulator/aqora_jobs_H2-Emulator.png)
+
+The full 18-cell study above is NumPy simulation with sampled shots.
+
+## Documents
+
+- [Team26_QRC_One_Page_Summary_final.pdf](Team26_QRC_One_Page_Summary_final.pdf) — one-page summary
+- [docs/QRC_v2_report_full_grid_6to16_qubits.pdf](docs/QRC_v2_report_full_grid_6to16_qubits.pdf) — written report: methods, all 18 cells, intervals, limitations
+
 ## Backend support
 
-Select with `--backend` (default `numpy`). Everything in `results/` was produced with `numpy`.
+Select with `--backend` (default `numpy`). The 18-cell study in `results/` was produced with `numpy`;
+the emulator run in `results/emulator/` went through `aqora.QPU` (see above).
 
 | Backend    | What it does                                                                     | Cost    | Status                            |
 | ---------- | -------------------------------------------------------------------------------- | ------- | --------------------------------- |
@@ -66,6 +98,7 @@ Select with `--backend` (default `numpy`). Everything in `results/` was produced
 | `exact`  | shot-noise-free ceiling, 4^N memory                                              | CPU/RAM | implemented, no committed results |
 | `syntax` | compile for a Quantinuum target and validate, no results                         | 0 HQC   | needs `pytket`, untested here   |
 | `nexus`  | submit via qnexus to an emulator or hardware (default device in code: `H1-1E`) | HQC     | needs `pytket`, untested here   |
+| Aqora `QPU` | `scripts/aqora_emulator_cells.py` in the challenge workspace, `nexus:H2-Emulator` | seconds | **run: 3 jobs, see above**      |
 
 Real hardware ≤ `numpy` ≤ `exact`: improving the hardware can approach the `numpy` result and never pass the
 `exact` one, so `exact` is the experiment that tells you whether any shot count could win.
@@ -84,7 +117,7 @@ Real hardware ≤ `numpy` ≤ `exact`: improving the hardware can approach the `
 - The `exact` ceiling at 6–10 qubits to separate shot noise from reservoir capacity.
 - More shots or readout designs, since many features sit near the shot-noise floor (`live` vs `feat`).
 - Other zero-day families (change `ZERO_DAY` in `sweep.py`) and split seeds (only seed 42 is committed).
-- Hardware-tier emulator runs via `syntax` then `nexus`.
+- Scale the H2-Emulator runs from the 6-qubit check to the 8–16 qubit cells and full test sets.
 
 ## Other datasets and topologies
 
@@ -106,9 +139,10 @@ PYTHON=python DATA=data/raw/NF-UNSW-NB15-v2.parquet WORKERS=24 bash scripts/reru
 
 ```
 src/iontraps_qrc/   core.py (reservoir, simulators, readout, detector), sweep.py, parallel.py, report.py
-scripts/            run_sweep.py, rerun_all.sh
+scripts/            run_sweep.py, rerun_all.sh, aqora_emulator_cells.py (H2-Emulator run)
 notebooks/          scaling_with_qubits.ipynb
-results/            committed results + README
+results/            committed results + README; emulator/ holds the H2-Emulator evidence
+docs/               written report (PDF)
 figures/            PNG / PDF
 data/               README; raw/ is git-ignored
 tests/              smoke tests
