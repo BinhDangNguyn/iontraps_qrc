@@ -36,6 +36,8 @@ def main():
     ap.add_argument("--only", help="run a single cell, e.g. 8q_a2a_L8")
     ap.add_argument("--workers", type=int, default=0,
                     help="N>0: simulate circuits on N processes (bit-identical to serial)")
+    ap.add_argument("--backend", choices=["numpy", "exact", "syntax", "nexus"],
+                    help="simulator / target (default: numpy)")
     ap.add_argument("--quick", action="store_true")
     ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args()
@@ -55,6 +57,8 @@ def main():
         sweep.OUT_DIR = Path(a.out)
     elif a.quick:
         sweep.OUT_DIR = REPO / "results" / "quick_check"
+    if a.backend:
+        sweep.BACKEND = a.backend
     if a.workers > 0:
         from iontraps_qrc import parallel
         parallel.install(core, workers=a.workers)
